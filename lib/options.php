@@ -31,7 +31,14 @@ class Options {
 	 */
 	private $keys = [
 		/**
+		 * Enable domains manager, OR not
+		 * @var boolean
+		 */
+		'use_domains',
+
+		/**
 		 * Custom content types data
+		 * @var array
 		 */
 		'domains',
 	];
@@ -59,6 +66,20 @@ class Options {
 			return call_user_func_array( [ $self, 'update' ], $args );
 
 		endif;
+	}
+
+	/**
+	 * @access public
+	 *
+	 * @param  string $key
+	 */
+	public static function full_key( $key = null ) {
+		$self = self::getInstance();
+		if ( is_string( $key ) && in_array( $key, $self->keys ) )
+			return $self->prefix . $key;
+		if ( ! $key )
+			return array_map( function( $key ) { return $this->prefix . $key; }, $self->keys );
+		return null;
 	}
 
 	/**

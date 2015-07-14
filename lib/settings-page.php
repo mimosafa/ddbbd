@@ -371,7 +371,7 @@ class Settings_Page {
 	 */
 	private function _page( $page = null, $page_title = null, $menu_title = null ) {
 		if ( $page === null && ! $this->toplevel )
-			$page = 'options.php';
+			$page = 'options-general.php';
 
 		if ( ! $page = filter_var( $page ) )
 			return;
