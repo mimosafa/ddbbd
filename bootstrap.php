@@ -8,6 +8,7 @@
 
 define( 'DDBBD_DIR', __DIR__ );
 define( 'DDBBD_FILE', DDBBD_DIR . '/ddbbd.php' );
+define( 'DDBBD_INC', DDBBD_DIR . '/inc' );
 
 add_action( 'plugins_loaded', 'DanaDonBoomBoomDoo::getInstance' );
 
@@ -42,7 +43,7 @@ class DanaDonBoomBoomDoo {
 	 */
 	private function _register_classloader() {
 		$options = [ 'file_prefix' => 'class-' ];
-		_ddbbd_register_classloader( 'DanaDonBoomBoomDoo', DDBBD_DIR . '/inc', $options );
+		_ddbbd_register_classloader( 'DanaDonBoomBoomDoo', DDBBD_INC, $options );
 	}
 
 	/**
@@ -67,8 +68,13 @@ class DanaDonBoomBoomDoo {
 	 * @access private
 	 */
 	private function init() {
-		if ( is_admin() )
+		if ( is_admin() ) {
+			DDBBD\Types\Objects::getInstance();
 			add_action( 'init', 'DanaDonBoomBoomDoo\\Settings::getInstance' );
+		}
+
+		#$data = json_decode( @file_get_contents( DDBBD_DIR . '/sample-domains.json' ), true );
+		#var_dump( $data );
 	}
 
 }

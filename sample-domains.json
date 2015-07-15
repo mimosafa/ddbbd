@@ -1,0 +1,10 @@
+[
+	{
+		"name": "wordpress",
+		"type": "post_type",
+	}, {
+		"name": "version",
+		"type": "taxonomy",
+		"object_types": [ "wordpress" ]
+	}
+]

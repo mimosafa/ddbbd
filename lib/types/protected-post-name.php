@@ -63,8 +63,8 @@ class Protected_Post_Name {
 	 * @param  string $post_type
 	 * @param  
 	 */
-	public function _remove_slugdiv( $post_type, \WP_Post $post ) {
-		if ( $this->_is_protected( $post_type, $post ) )
+	public function _remove_slugdiv( $post_type, $post ) {
+		if ( $post instanceof \WP_Post && $this->_is_protected( $post_type, $post ) )
 			remove_meta_box( 'slugdiv', $post_type, 'normal' );
 	}
 
@@ -131,6 +131,8 @@ class Protected_Post_Name {
 	 * @return boolean
 	 */
 	private function _is_protected( $post_type, $post ) {
+		if ( ! $post )
+			return false;
 		if ( ! in_array( $post_type, $this->post_types, true ) )
 			return false;
 

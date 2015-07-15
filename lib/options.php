@@ -34,13 +34,13 @@ class Options {
 		 * Enable domains manager, OR not
 		 * @var boolean
 		 */
-		'use_domains',
+		'use_custom_types',
 
 		/**
 		 * Custom content types data
 		 * @var array
 		 */
-		'domains',
+		'types',
 	];
 
 	/**
@@ -94,19 +94,25 @@ class Options {
 
 	/**
 	 * Option getter
+	 * - If the option dose not exists, return null value
 	 *
 	 * @access private
 	 *
 	 * @param  string $key
-	 * @param  mixed  $default
-	 * @return mixed
+	 * @param  string $subkey Optional
+	 * @return mixed|null
 	 */
-	private function get( $key, $default = false ) {
+	private function get() {
+		$args = func_get_args();
+		$key = $args[0];
+		if ( ! in_array( $key, $this->keys, true ) )
+			return null;
+		if ( isset( $args[1] ) && filter_var( $args[1] ) )
+			$key .= '_' . $args[1];
+
 		if ( ! $value = wp_cache_get( $key, $this->group ) ) {
-			if ( ! in_array( $key, $this->keys, true ) )
-				return $default;
-			$value = get_option( $this->prefix . $key, $default );
-			wp_cache_set( $key, $value, $this->group );
+			if ( $value = get_option( $this->prefix . $key, null ) )
+				wp_cache_set( $key, $value, $this->group );
 		}
 		return $value;
 	}
@@ -117,12 +123,24 @@ class Options {
 	 * @access private
 	 *
 	 * @param  string $key
+	 * @param  string $subkey   Optional
 	 * @param  mixed  $newvalue
 	 * @return boolean
 	 */
-	private function update( $key, $newvalue ) {
-		if ( $this->get( $key ) === $newvalue )
+	private function update() {
+		$args = func_get_args();
+		$key = $args[0];
+		if ( count( $args ) > 2 && ! is_array( $args[1] ) && ! is_object( $args[1] ) ) {
+			$newvalue = $args[2];
+			$subkey = $args[1];
+			$oldvalue = $this->get( $key, $subkey );
+		} else {
+			$newvalue = $args[1];
+			$oldvalue = $this->get( $key );
+		}
+		if ( $oldvalue === $newvalue )
 			return false;
+		$key .= isset( $subkey ) ? '_' . $subkey : '';
 		wp_cache_delete( $key, $this->group );
 		return update_option( $this->prefix . $key, $newvalue );
 	}
