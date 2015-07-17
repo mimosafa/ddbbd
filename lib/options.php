@@ -1,7 +1,7 @@
 <?php
 namespace DDBBD;
 
-class Options {
+trait Options {
 
 	/**
 	 * Singleton pattern
@@ -12,36 +12,26 @@ class Options {
 
 	/**
 	 * Cache group name
+	 * - If use WP_Cache API, define as '$cache_group'
 	 *
 	 * @var string
 	 */
-	private $group = 'ddbbd_caches';
 
 	/**
 	 * Prefix of option keys
+	 * - If necessary, define as '$prefix'
 	 *
 	 * @var string
 	 */
-	private $prefix = 'ddbbd_';
 
 	/**
 	 * Option keys
+	 * - You must define as '$keys'
+	 * - Regexp: /[a-zA-Z0-9_\-]+/
+	 * - e.g.:   private $keys = [ 'company_name', 'company-representative' ];
 	 *
 	 * @var array
 	 */
-	private $keys = [
-		/**
-		 * Enable domains manager, OR not
-		 * @var boolean
-		 */
-		'use_custom_types',
-
-		/**
-		 * Custom content types data
-		 * @var array
-		 */
-		'types',
-	];
 
 	/**
 	 * Option interface (Getter/Setter)
@@ -50,6 +40,8 @@ class Options {
 	 */
 	public static function __callStatic( $name, $args ) {
 		$self = self::getInstance();
+		if ( ! property_exists( $self, 'keys' ) )
+			return;
 
 		if ( substr( $name, 0, 4 ) === 'get_' ) :
 			/**
@@ -75,10 +67,18 @@ class Options {
 	 */
 	public static function full_key( $key = null ) {
 		$self = self::getInstance();
-		if ( is_string( $key ) && in_array( $key, $self->keys ) )
-			return $self->prefix . $key;
+		if ( ! property_exists( $self, 'keys' ) )
+			return null;
+
+		if ( is_string( $key ) && in_array( $key, $self->keys, true ) )
+			return property_exists( $self, 'prefix' ) ? $self->prefix . $key : $key;
+
 		if ( ! $key )
-			return array_map( function( $key ) { return $this->prefix . $key; }, $self->keys );
+			if ( property_exists( $self, 'prefix' ) )
+				return array_map( function( $key ) { return $this->prefix . $key; }, $self->keys );
+			else
+				return $self->keys;
+
 		return null;
 	}
 
@@ -88,8 +88,8 @@ class Options {
 	 * @access protected
 	 */
 	protected function __construct() {
-		$this->keys = apply_filters( 'ddbbd_options_keys', $this->keys );
-		add_filter( 'pre_update_option', [ &$this, '_pre_update_option' ], 10, 3 );
+		if ( property_exists( __CLASS__, 'prefix' ) )
+			add_filter( 'pre_update_option', [ &$this, '_pre_update_option' ], 10, 3 );
 	}
 
 	/**
@@ -110,9 +110,15 @@ class Options {
 		if ( isset( $args[1] ) && filter_var( $args[1] ) )
 			$key .= '_' . $args[1];
 
-		if ( ! $value = wp_cache_get( $key, $this->group ) ) {
-			if ( $value = get_option( $this->prefix . $key, null ) )
-				wp_cache_set( $key, $value, $this->group );
+		if ( ! property_exists( __CLASS__, 'cache_group' ) ) {
+			$option = property_exists( __CLASS__, 'prefix' ) ? $this->prefix . $key : $key;
+			return get_option( $option, null );
+		}
+
+		if ( ! $value = wp_cache_get( $key, $this->cache_group ) ) {
+			$option = property_exists( __CLASS__, 'prefix' ) ? $this->prefix . $key : $key;
+			if ( $value = get_option( $option, null ) )
+				wp_cache_set( $key, $value, $this->cache_group );
 		}
 		return $value;
 	}
@@ -140,9 +146,15 @@ class Options {
 		}
 		if ( $oldvalue === $newvalue )
 			return false;
+
 		$key .= isset( $subkey ) ? '_' . $subkey : '';
-		wp_cache_delete( $key, $this->group );
-		return update_option( $this->prefix . $key, $newvalue );
+
+		if ( property_exists( __CLASS__, 'cache_group' ) )
+			wp_cache_delete( $key, $this->cache_group );
+
+		$option = property_exists( __CLASS__, 'prefix' ) ? $this->prefix . $key : $key;
+
+		return update_option( $option, $newvalue );
 	}
 
 	/**
@@ -159,10 +171,20 @@ class Options {
 			return $value;
 
 		$key = substr( $option, strlen( $this->prefix ) );
-		if ( ! in_array( $key, $this->keys, true ) )
-			return $value;
+		$subkey = '';
+		if ( ! in_array( $key, $this->keys, true ) ) {
+			foreach ( $this->keys as $string ) {
+				if ( $string . '_' === substr( $key, 0, strlen( $string ) + 1 ) ) {
+					$key = $string;
+					$subkey = substr( $key, strlen( $string ) + 2 );
+					break;
+				}
+			}
+			if ( ! $subkey )
+				return $value;
+		}
 
-		return apply_filters( 'ddbbd_options_pre_update_' . $key, $value, $old_value );
+		return apply_filters( $this->prefix . 'options_pre_update_' . $key, $value, $old_value, $subkey );
 	}
 
 }

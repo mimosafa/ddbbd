@@ -28,7 +28,7 @@ class Settings {
 	protected function __construct() {
 		$this->page = new D\Settings_Page( 'ddbbd', '', __( 'DDBBD', 'ddbbd' ) );
 
-		if ( D\Options::get_use_custom_types() ) {
+		if ( Options::get_use_custom_types() ) {
 			/**
 			 * Custom Types Management page
 			 */
@@ -62,7 +62,7 @@ class Settings {
 		$this->page
 				->description( __( 'If you enable to use Custom Types, "Types" menu will appear.' ) )
 					->field( 'enable-custom-types', __( 'Enable Custom Types', 'ddbbd' ) )
-					->option_name( D\Options::full_key( 'use_custom_types' ), 'checkbox' )
+					->option_name( Options::full_key( 'use_custom_types' ), 'checkbox' )
 		;
 	}
 

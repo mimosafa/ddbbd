@@ -19,7 +19,7 @@ class Types_List_Table extends \DDBBD\List_Table {
 			$this->get_sortable_columns()
 		];
 
-		$custom_types = D\Options::get_types();
+		$custom_types = Options::get_types();
 		if ( ! $custom_types ) {
 			$_REQUEST['view'] = 'all';
 			$this->items = array_filter( D\Types\Objects::getAll(), function( $array ) { return isset( $array['type'] ); } );
