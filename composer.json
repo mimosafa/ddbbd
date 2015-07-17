@@ -1,0 +1,7 @@
+{
+	"name": "dana-don-boom-boom-doo/ddbbd",
+	"type": "wordpress-plugin",
+	"require": {
+		"composer/installers": "~1.0"
+	}
+}
