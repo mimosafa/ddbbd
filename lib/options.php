@@ -88,8 +88,12 @@ trait Options {
 	 * @access protected
 	 */
 	protected function __construct() {
-		if ( property_exists( __CLASS__, 'prefix' ) )
+		if ( ! property_exists( __CLASS__, 'keys' ) || ! is_array( $this->keys ) )
+			return;
+		if ( property_exists( __CLASS__, 'prefix' ) ) {
+			$this->keys = apply_filters( $this->prefix . '_option_keys', $this->keys );
 			add_filter( 'pre_update_option', [ &$this, '_pre_update_option' ], 10, 3 );
+		}
 	}
 
 	/**
