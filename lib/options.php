@@ -27,14 +27,14 @@ trait Options {
 	/**
 	 * Option keys
 	 * - You must define as '$keys'
-	 * - Regexp: /[a-zA-Z0-9_\-]+/
-	 * - e.g.:   private $keys = [ 'company_name', 'company-representative' ];
+	 * - Regexp: /[a-zA-Z0-9_]+/
+	 * - e.g.:   private $keys = [ 'company_name', 'representative' ];
 	 *
 	 * @var array
 	 */
 
 	/**
-	 * Option interface (Getter/Setter)
+	 * Option interface
 	 *
 	 * @access public
 	 */
@@ -56,6 +56,12 @@ trait Options {
 			 */
 			array_unshift( $args, substr( $name, 7 ) );
 			return call_user_func_array( [ $self, 'update' ], $args );
+
+		elseif ( substr( $name, 0, 7 ) === 'delete_' ) :
+			/**
+			 * @uses DDBBD\Options::delete()
+			 */
+			return call_user_func_array( [ $self, 'delete' ], $args );
 
 		endif;
 	}
@@ -159,6 +165,31 @@ trait Options {
 		$option = property_exists( __CLASS__, 'prefix' ) ? $this->prefix . $key : $key;
 
 		return update_option( $option, $newvalue );
+	}
+
+	/**
+	 * Deleter
+	 *
+	 * @access private
+	 *
+	 * @param  string $key
+	 * @param  string $subkey Optional
+	 * @return
+	 */
+	private function delete() {
+		$args = func_get_args();
+		$key = $args[0];
+		if ( ! in_array( $key, $this->keys, true ) )
+			return null;
+		if ( isset( $args[1] ) && filter_var( $args[1] ) )
+			$key .= '_' . $args[1];
+
+		if ( property_exists( __CLASS__, 'cache_group' ) )
+			wp_cache_delete( $key, $this->cache_group );
+
+		$option = property_exists( __CLASS__, 'prefix' ) ? $this->prefix . $key : $key;
+
+		return delete_option( $option );
 	}
 
 	/**
