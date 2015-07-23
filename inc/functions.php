@@ -70,3 +70,19 @@ if ( ! function_exists( '_ddbbd_register_classloader' ) ) {
 			DDBBD\ClassLoader::register( $namespace, $path, $options );
 	}
 }
+
+if ( ! function_exists( '_ddbbd_settings_page' ) ) {
+	/**
+	 * Dana Don-Boom-Boom-Doo plugin's settings page instance returner
+	 *
+	 * @return DDBBD\Settings_Page
+	 */
+	function _ddbbd_settings_page() {
+		static $instance;
+		if ( ! $instance ) {
+			$instance = new DDBBD\Settings_Page( 'ddbbd', '', __( 'DDBBD', 'ddbbd' ) );
+			add_action( 'wp_loaded', array( $instance, 'done' ) );
+		}
+		return $instance;
+	}
+}

@@ -26,9 +26,8 @@ class Settings {
 	 * @access private
 	 */
 	protected function __construct() {
-		$this->page = new D\Settings_Page( 'ddbbd', '', __( 'DDBBD', 'ddbbd' ) );
+		$this->page = _ddbbd_settings_page();
 		$this->_pages();
-		$this->page->done();
 	}
 
 	private function _pages() {
