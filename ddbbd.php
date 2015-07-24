@@ -41,4 +41,6 @@ if ( ! class_exists( 'DDBBD\\ClassLoader' ) ) {
 	_ddbbd_register_classloader( 'DDBBD', DDBBD_DIR . '/lib' );
 }
 
+_ddbbd_register_classloader( 'DanaDonBoomBoomDoo', DDBBD_INC, [ 'file_prefix' => 'class-' ] );
+
 require_once 'bootstrap.php';

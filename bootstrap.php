@@ -5,22 +5,31 @@
  * @package DDBBD
  * @author  Toshimichi Mimoto
  */
+namespace DanaDonBoomBoomDoo;
 
-add_action( 'plugins_loaded', 'DanaDonBoomBoomDoo::getInstance' );
+/**
+ * Index in 'Dana Don-Boom-Boom-Doo' plugins
+ */
+const ORDER = 0;
+
+/**
+ * Bootstrap after plugins loaded
+ */
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\Bootstrap::getInstance' );
 
 /**
  * Dana Don-Boom-Boom-Doo plugin bootstrap class
  *
  * @access private
  */
-class DanaDonBoomBoomDoo {
+class Bootstrap {
 
 	/**
 	 * Singleton pattern
 	 *
 	 * @uses DDBBD\Singleton
 	 */
-	use DDBBD\Singleton;
+	use \DDBBD\Singleton;
 
 	/**
 	 * Constructor
@@ -28,18 +37,9 @@ class DanaDonBoomBoomDoo {
 	 * @access private
 	 */
 	protected function __construct() {
-		$this->_register_classloader();
 		register_activation_hook( DDBBD_FILE, [ &$this, '_activation' ] );
 		register_deactivation_hook( DDBBD_FILE, [ &$this, '_deactivation' ] );
 		$this->init();
-	}
-
-	/**
-	 * @access private
-	 */
-	private function _register_classloader() {
-		$options = [ 'file_prefix' => 'class-' ];
-		_ddbbd_register_classloader( 'DanaDonBoomBoomDoo', DDBBD_INC, $options );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class DanaDonBoomBoomDoo {
 	 */
 	private function init() {
 		if ( is_admin() )
-			add_action( 'init', 'DanaDonBoomBoomDoo\\Settings::getInstance' );
+			add_action( 'init', __NAMESPACE__ . '\\Settings::getInstance', ORDER );
 	}
 
 }
