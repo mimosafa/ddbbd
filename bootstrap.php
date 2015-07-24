@@ -6,10 +6,6 @@
  * @author  Toshimichi Mimoto
  */
 
-define( 'DDBBD_DIR', __DIR__ );
-define( 'DDBBD_FILE', DDBBD_DIR . '/ddbbd.php' );
-define( 'DDBBD_INC', DDBBD_DIR . '/inc' );
-
 add_action( 'plugins_loaded', 'DanaDonBoomBoomDoo::getInstance' );
 
 /**

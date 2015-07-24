@@ -61,11 +61,9 @@ if ( ! function_exists( '_ddbbd_register_classloader' ) ) {
 	 * @param  string $path
 	 * @return void
 	 */
-	function _ddbbd_register_classloader( $namespace, $path = null, $options = null ) {
-		if ( ! $path ) {
-			$path  = trailingslashit( WP_PLUGIN_DIR );
-			$path .= str_replace( '\\', '-', trim( $namespace, '\\' ) );
-		}
+	function _ddbbd_register_classloader( $namespace, $path, $options = null ) {
+		$options = is_array( $options ) ? $options : [];
+		$options = array_merge( $options, [ 'hyphenate_classname' => true ] );
 		if ( class_exists( 'DDBBD\\ClassLoader' ) )
 			DDBBD\ClassLoader::register( $namespace, $path, $options );
 	}
