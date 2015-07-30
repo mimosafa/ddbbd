@@ -1,24 +1,24 @@
 <?php
 namespace DanaDonBoomBoomDoo;
 
-// Import namespace
 use DDBBD as D;
 
+/**
+ *
+ */
 class Settings {
 
+	/**
+	 * Singleton pattern
+	 *
+	 * @uses DDBBD\Singleton
+	 */
 	use D\Singleton;
 
 	/**
-	 * @var DDBBD\Settings_Page
+	 * @var DDBBD\Options
 	 */
-	private $page;
-
-	/**
-	 * DDBBD content type map
-	 *
-	 * @var array
-	 */
-	private $domains;
+	private $options;
 
 	/**
 	 * Constructor
@@ -26,32 +26,29 @@ class Settings {
 	 * @access private
 	 */
 	protected function __construct() {
-		$this->page = _ddbbd_settings_page();
-		$this->_pages();
+		$this->options = _ddbbd_options();
+		$this->init();
 	}
 
-	private function _pages() {
-		do_action( '_dana_don_boom_boom_doo_before_general_settings', $this->page );
-		$this->_general_settings();
-		do_action( '_dana_don_boom_boom_doo_after_general_settings', $this->page );
+	private function init() {
+		$exists_plugins = [];
+
+		/**
+		 * Types
+		 */
+		if ( class_exists( __NAMESPACE__ . '\\Types\\Bootstrap' ) ) {
+			$exists_plugins[] = 'types';
+			add_action( '_ddbbd_types_settings_general_settings', [ &$this, 'types_general_settings' ], 10, 2 );
+		}
 	}
 
-	/**
-	 * Dana Don-Boom-Boom-Doo plugin general settings page
-	 *
-	 * @access private
-	 */
-	private function _general_settings() {
-		$this->page
-		->init( 'ddbbd-settings', __( 'Dana Don-Boom-Boom-Doo General Settings', 'ddbbd' ), __( 'Settings', 'ddbbd' ) )
-			->section( 'custom-types-manager', __( 'Custom Types Management' ) )
-				->description( __( 'Dana Don-Boom-Boom-Doo plugin will make you enable to manage Custom Content Types easier.') )
-				->description( __( 'Every Custom Post Types, Custom Taxonomies, and Custom Endpoints will be managed as <strong>Type</strong> units.' ) )
-		;
-
-		if ( ! apply_filters( '_dana_don_boom_boom_doo_general_settings_types', false, $this->page ) ) {
-			$this->page
-				->description( __( 'If you want to use Custom Types, please install "Dana Don-Boom-Boom-Doo Types" plugin.' ) )
+	public function types_general_settings( $page, $use_types ) {
+		if ( $use_types ) {
+			$page
+				->field( 'export-types-as-json', __( 'Save as json files', 'ddbbd' ) )
+					->option_name( $this->options->full_key( 'save_types_as_json' ), 'checkbox' )
+				->field( 'dir-for-save-json', __( 'Directory for saving json files', 'ddbbd' ) )
+					->option_name( $this->options->full_key( 'types_json_dir' ), [ &$this, 'save_json_dir' ] )
 			;
 		}
 	}

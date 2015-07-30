@@ -2,25 +2,24 @@
 /**
  * Dana Don-Boom-Boom-Doo plugin bootstrap file.
  *
- * @package DDBBD
- * @author  Toshimichi Mimoto
+ * @package    WordPress
+ * @subpackage DDBBD
+ * @author     Toshimichi Mimoto
  */
 namespace DanaDonBoomBoomDoo;
 
 /**
  * Index in 'Dana Don-Boom-Boom-Doo' plugins
  */
-const ORDER = 0;
+const INDEX = 0;
 
 /**
  * Bootstrap after plugins loaded
  */
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\Bootstrap::getInstance' );
+add_action( 'plugins_loaded', __NAMESPACE__ . '\\Bootstrap::getInstance', INDEX );
 
 /**
  * Dana Don-Boom-Boom-Doo plugin bootstrap class
- *
- * @access private
  */
 class Bootstrap {
 
@@ -32,14 +31,34 @@ class Bootstrap {
 	use \DDBBD\Singleton;
 
 	/**
+	 * @var DDBBD\Options
+	 */
+	private $options;
+
+	/**
 	 * Constructor
 	 *
 	 * @access private
 	 */
 	protected function __construct() {
+		$this->add_options();
 		register_activation_hook( DDBBD_FILE, [ &$this, '_activation' ] );
 		register_deactivation_hook( DDBBD_FILE, [ &$this, '_deactivation' ] );
 		$this->init();
+	}
+
+	private function add_options() {
+		$this->options = _ddbbd_options();
+
+		/**
+		 *
+		 */
+		$this->options->add( 'save_types_as_json', 'boolean' );
+
+		/**
+		 *
+		 */
+		$this->options->add( 'types_json_dir' );
 	}
 
 	/**
@@ -64,8 +83,8 @@ class Bootstrap {
 	 * @access private
 	 */
 	private function init() {
-		if ( is_admin() )
-			add_action( 'init', __NAMESPACE__ . '\\Settings::getInstance', ORDER );
+		if ( is_admin() && current_user_can( 'manage_options' ) )
+			Settings::getInstance();
 	}
 
 }
